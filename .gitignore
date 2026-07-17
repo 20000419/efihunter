@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+*.key
+*.bin
+*.efi
+*.rom
+output/
+*.db
+.DS_Store

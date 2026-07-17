@@ -1,0 +1,97 @@
+### **General SMM Vulnerability Detection Prompt Guide (Final Version)**  
+**Objective**: Guide LLMs to identify high-risk vulnerability patterns in SMM modules through static analysis of UEFI firmware function-level code.  
+
+---
+
+### **Core Detection Logic**  
+1. **Privileged Context Identification**  
+   - Detect if the function is within an `SMI Handler` or `EFI_SMM_XXX` service.  
+   - Flag code segments involving `SMRAM` interactions (e.g., operations on `mSmramBase/mSmramSize`).  
+
+2. **Dangerous Operation Patterns**  
+   ```c
+   // Example of critical risk patterns
+   VOID* ptr = (VOID*)(UINTN)ReadCpuRegXX(EFI_SMM_SAVE_STATE_REG_XX); // Obtain pointer from register
+   CopyMem(ptr, src, size);  // Direct operation without pointer validation
+   Struct->Field = value;    // Direct write to unvalidated structure field
+   ```
+
+3. **Validation Defect Detection**  
+   - **Missing Checks**:  
+     - `BufferInCmdBuffer()` or `ValidateNotInSmram()` not called.  
+     - Dynamic calculations (e.g., `offset = a + b`) without range validation.  
+   - **Incorrect Order**:  
+     ```c
+     Dereference(ptr);      // Dereference first
+     Validate(ptr, size);   // Validate later (DANGEROUS!)
+     ```
+
+4. **Risk Data Flow Tracing**  
+   - Taint propagation path:  
+     ```mermaid
+     graph LR
+     A[ReadCpuRegXX/GetVariable] --> B[Pointer dereference] --> C[CopyMem/Structure write]
+     ```
+
+---
+
+### **Vulnerability Classification and Characteristics**  
+| Vulnerability Type                      | Key Code Characteristics                     | Example Code Snippet                     |
+|-----------------------------------------|----------------------------------------------|------------------------------------------|
+| **Stack Buffer Overflow Vulnerability** | `CopyMem` target address not validated + SMRAM overlap | `CopyMem(ReadReg(RCX), src, size)`       |
+| **Memory Contents Leak/Information Disclosure Vulnerability** | Unvalidated data read from SMRAM or privileged registers | `CopyMem(dest, ReadReg(RDX), size)`      |
+| **SMM Callout Vulnerability**           | SMM handler directly calls untrusted code or data | `EFI_SMM_CALLBACK_REGISTER(Callback)`    |
+| **Memory Corruption Vulnerability**     | Unvalidated pointer arithmetic or out-of-bounds writes | `*(ptr + offset) = value;`               |
+| **Out-of-bounds Read Vulnerability**    | Read operations beyond buffer bounds         | `for (i=0; i<=size; i++) { data = ptr[i]; }` |
+
+---
+
+### **Detection Steps**  
+1. **Context Marking**  
+   - Identify if the function belongs to an `SMI Handler` (search for `SmiHandlerRegister` or `EFI_SMM_XXX_PROTOCOL`).  
+   - Flag all `EFI_SMM_SAVE_STATE_REGISTER_*` register operations.  
+
+2. **Dangerous Operation Scanning**  
+   - Locate the following function calls:  
+     ```c
+     CopyMem/memcpy/StrCpy  
+     ReadCpuRegXX/WriteCpuRegXX  
+     GetVariable/PcdGetXX  
+     ```
+   - Check if validation logic (e.g., `BufferInCmdBuffer`) is present.  
+
+3. **Validation Logic Analysis**  
+   - **Positive Rule**: Flag as safe if any of the following exists:  
+     ```c
+     if (ValidateNotInSmram(ptr) && 
+         ValidateSize(size, MAX_SAFE_SIZE) && 
+         CheckPointerChain(ptr)) 
+     ```
+   - **Negative Rule**: Flag as high-risk if unvalidated pollution sources exist in the operation chain.  
+
+4. **False Positive Filtering**  
+   - Reduce risk level if the code segment contains:  
+     ```c
+     #pragma atomic_begin()  // Atomic operation protection
+     if (IsSmramLocked())    // SMRAM is locked
+     __security_check(...)   // Explicit security validation
+     ```
+
+---
+
+### **Model Optimization Tips**  
+1. **Semantic Enhancement**: Focus on `SMRAM`-related constants (e.g., `0xA0000`) and `EFI_BOOT_SERVICES` calls.  
+2. **Pattern Generalization**: Even if custom functions (e.g., `IhisiProtReadCpuReg32`) are used, their behavior is equivalent to standard register reads.  
+3. **Deep Reasoning**: Trace the complete data flow if function parameters ultimately flow into the `SMRAM` region (e.g., `mBiosGuardMemAddress`).  
+
+---
+You will be provided with a piece of program code. During the analysis process, the code content of other functions called by this function will be provided as context. You can combine this context information to more accurately analyze the function's functionality, logic, and potential issues. Please analyze the program code, identify whether there are SMM memory security vulnerabilities, and extract the key information, outputting it in JSON format. The output JSON must follow the following format:
+```json
+{
+  "function": "",
+  "risk_level": "",
+  "vulnerability_type": [""],
+  "evidence": [""]
+}
+```
+

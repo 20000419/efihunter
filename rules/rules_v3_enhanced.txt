@@ -1,0 +1,158 @@
+### **Enhanced UEFI Vulnerability Detection Prompt Guide V3.0 (Corrected Logic)**
+**Objective**: Drastically reduce false positives AND prevent false negatives by teaching the LLM nuanced validation patterns.
+
+---
+
+## **Critical Nuance: Validation is Necessary, but NOT Sufficient!**
+A common analysis mistake is to assume that the presence of a validation function like `SmmIsBufferOutsideSmmValid` or `ValidateAddressNotInSmram` automatically makes the code safe. This is **incorrect**.
+
+- **This check ONLY prevents direct access to SMRAM.** It does **NOT** prevent other vulnerabilities like out-of-bounds writes to other buffers, Time-of-Check-to-Time-of-Use (TOCTOU) bugs, or logic flaws that might occur later in the function.
+- **Your task is to continue analyzing the entire function.** If you see `SmmIsBufferOutsideSmmValid`, treat it as one passed checkmark for one specific attack vector, but you **must still look for other, different vulnerabilities** in the code that follows. A function can be vulnerable **EVEN IF** it contains a successful SMRAM check.
+
+---
+
+## **Critical Validation Rules (False Positive Prevention)**
+
+### **1. Mandatory Validation Checklist**
+Before flagging any code as vulnerable, verify ALL of the following:
+
+**A. SMM Context Verification:**
+- "SmiHandler" in function name, `EFI_SMM_` protocols, `gSmst` calls, etc.
+
+**B. Dangerous Source Identification:**
+- Unvalidated input from `GetVariable()`, communication buffers, or CPU registers.
+
+**C. Missing Validation Check for a SPECIFIC attack:**
+- For a SMRAM access bug, look for the **ABSENCE** of `ValidateNotInSmram`.
+- For a buffer overflow, look for the **ABSENCE** of size checks (`if (size > MAX_SIZE)`).
+
+### **2. Safe Code Patterns (Use with Caution!)**
+
+**Validation Function Presence:**
+```c
+// If ANY of these functions are present before a dangerous memory operation:
+- ValidateAddressNotInSmram()
+- BufferInCmdBuffer()
+- ValidateSize()
+- IsAddressInSmram() (returning FALSE)
+// Then this specific SMRAM access vector is LIKELY SAFE,
+// but you must continue to check for other vulnerability types.
+```
+
+---
+
+## **Precise Vulnerability Pattern Detection (Updated Logic)**
+
+### **Pattern 1: Stack Buffer Overflow**
+**Required Criteria:**
+1. ✅ SMM context.
+2. ✅ Stack-allocated buffer: `TYPE Buffer[SIZE]`.
+3. ✅ Unvalidated input size is used in a copy operation.
+4. ✅ The copy operation targets the stack buffer.
+5. ❌ **No size validation** that specifically compares the input size with the buffer's capacity (`sizeof(Buffer)`).
+
+### **Pattern 2: The "Tricky" Vulnerability (Validation Bypass)**
+This is the case that requires careful analysis.
+
+**Required Criteria:**
+1. ✅ SMM context.
+2. ✅ A validation function like `SmmIsBufferOutsideSmmValid` is present and passes.
+3. ✅ **BUT**, a subsequent operation, possibly in a nested function call, performs an unchecked action.
+4. ✅ The unchecked action uses the same user-controlled buffer but leads to a *different* vulnerability (e.g., out-of-bounds write, TOCTOU).
+
+**Example:**
+```c
+// VULNERABLE - Deceptive Validation
+EFI_STATUS SmiHandler(CommBuffer *Buf) {
+    // This check passes, preventing SMRAM access.
+    if (SmmIsBufferOutsideSmmValid(Buf->Ptr, Buf->Size)) {
+        // BUT this function has a separate bug!
+        // It trusts Buf->Size and writes out of bounds inside another buffer.
+        AnotherFunction(Buf->Ptr, Buf->Size);
+    }
+    return EFI_SUCCESS;
+}
+```
+**Analysis of this pattern:** The presence of `SmmIsBufferOutsideSmmValid` prevents one bug, but does not prevent the bug inside `AnotherFunction`. You must flag this as **VULNERABLE** and cite the bug in `AnotherFunction` as the reason.
+
+---
+
+## **Few-Shot Examples with Corrected Nuance**
+
+### **Example 1: Truly Safe Code**
+```c
+// Code to analyze:
+EFI_STATUS SafeHandler(EFI_HANDLE DispatchHandle) {
+    CHAR8 Buffer[16];
+    UINTN Size = *((UINTN*)CommBuffer);
+
+    // Validation present AND correctly used
+    if (Size > sizeof(Buffer)) { return EFI_INVALID_PARAMETER; }
+    if (!SmmIsBufferOutsideSmmValid(CommBuffer, Size)) { return EFI_ACCESS_DENIED; }
+
+    CopyMem(Buffer, CommBuffer + 4, Size); // This is now fully safe.
+    return EFI_SUCCESS;
+}
+
+// Analysis:
+1. ✅ SMM context.
+2. ✅ Validation: Both buffer size (`Size > sizeof(Buffer)`) and SMRAM location are checked.
+3. ✅ Safe copy: The copy operation is guarded by all necessary checks.
+
+// CONCLUSION: NO VULNERABILITY
+TYPE: No-Vulnerability
+```
+
+### **Example 2: The Tricky Vulnerability (Correct Analysis)**
+```c
+// Code to analyze:
+EFI_STATUS TrickyHandler(CommBufferStruct *CommBuffer) {
+    // This check is present and passes.
+    if (SmmIsBufferOutsideSmmValid(CommBuffer->BufferPtr, CommBuffer->BufferSize)) {
+        // BUT, the vulnerability is in the nested call.
+        // sub_189C performs an unchecked CopyMem.
+        sub_189C(CommBuffer->BufferPtr);
+    }
+    return EFI_SUCCESS;
+}
+
+// Analysis:
+1. ✅ SMM context.
+2. ✅ SMRAM check is present. This prevents SMRAM-specific attacks.
+3. ❌ BUT: A nested function `sub_189C` is called with user-controlled data.
+4. ❌ Inside `sub_189C` (not shown but assumed from context), an unchecked `CopyMem` causes a buffer overflow on a different buffer.
+5. ✅ The initial SMRAM check does NOT prevent this separate overflow.
+
+// CONCLUSION: MEMORY CORRUPTION VULNERABILITY
+TYPE: Memory-Corruption-vulnerability
+REASON: Despite the presence of SmmIsBufferOutsideSmmValid, the code is still vulnerable because the sub_189C function performs an unchecked memory copy, leading to a buffer overflow. The initial check is insufficient.
+```
+
+---
+
+## **Strict Answer Requirements**
+
+### **Binary Classification:**
+```
+Answer EXACTLY in this format:
+VULNERABLE: YES
+[Provide brief reasoning. If validation functions are present but insufficient, EXPLAIN WHY they are insufficient.]
+
+OR
+
+VULNERABLE: NO
+[Provide brief reasoning explaining why the combination of safety mechanisms prevents exploitation.]
+```
+
+---
+
+## **Quality Check Questions**
+
+Before finalizing your answer, ask yourself:
+1. "Is this really in SMM context?"
+2. "Is there unvalidated input from a dangerous source?"
+3. "Are validation functions completely missing for the specific operation in question?"
+4. **"If a validation function is present, does it actually prevent the specific vulnerability I think I've found?"** (This is the most important new question!)
+5. "Could this still be exploited in practice?"
+
+If you cannot answer YES to questions 1, 2, and 4 with high confidence, lean towards "No-Vulnerability".

@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+title: "EFIhunter: Dynamic Call Context Framework for LLM-Driven Binary Vulnerability Detection"
+message: "If you use this software, please cite the accompanying paper."
+authors:
+  - family-names: Liu
+    given-names: Zhenyu
+  - family-names: Chen
+    given-names: Zhifeng
+  - family-names: Li
+    given-names: Qingbao
+  - family-names: Cao
+    given-names: Fei
+  - family-names: Yang
+    given-names: Linzheng
+  - family-names: Wang
+    given-names: Chaobing
+license: MIT
