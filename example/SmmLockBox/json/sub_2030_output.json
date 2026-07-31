@@ -1,0 +1,15 @@
+
+
+```json
+{
+  "function": "sub_2030",
+  "risk_level": "low",
+  "vulnerability_type": [],
+  "evidence": [
+    "No SMM context markers (e.g., EFI_SMM_XXX_PROTOCOL or SMI handler registration) detected",
+    "No SMRAM-related operations (mSmramBase/mSmramSize) or register access functions (ReadCpuRegXX/WriteCpuRegXX) found",
+    "No unvalidated pointer operations or dangerous functions (CopyMem/Structure write) present",
+    "Only simple variable assignment (byte_31F0 = 0) and return statement observed"
+  ]
+}
+```

@@ -1,0 +1,18 @@
+
+
+```json
+{
+  "function": "sub_1110",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Information Disclosure Vulnerability"
+  ],
+  "evidence": [
+    "Unvalidated pointer arithmetic on 'a1' (e.g., a1 + 248, a1 + 80) without SMRAM validation checks.",
+    "Direct use of __readcr4/rdsspq (privileged register access) without pointer validation.",
+    "Call to _mm_setcsr with unvalidated data from a1 + 80.",
+    "Indirect function call via untrusted pointer at a1 + 72 without validation."
+  ]
+}
+```

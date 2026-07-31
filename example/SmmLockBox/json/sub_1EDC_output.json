@@ -1,0 +1,14 @@
+
+
+```json
+{
+  "function": "sub_1EDC",
+  "risk_level": "High",
+  "vulnerability_type": ["Memory Contents Leak/Information Disclosure Vulnerability"],
+  "evidence": [
+    "Directly returns a pointer from the ConfigurationTable without validation (e.g., `ValidateNotInSmram`).",
+    "No checks for SMRAM overlap on the returned pointer (`v5[3 * v3 + 2]`).",
+    "Uses unvalidated data flow from `gST` (System Table) to output, potentially exposing sensitive SMRAM data."
+  ]
+}
+```

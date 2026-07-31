@@ -1,0 +1,14 @@
+
+
+```json
+{
+  "function": "sub_11D0",
+  "risk_level": "low",
+  "vulnerability_type": [],
+  "evidence": [
+    "The function executes CPUID instruction and writes register values to output parameters but does not interact with SMRAM or SMM-specific protocols.",
+    "No validation checks (e.g., BufferInCmdBuffer, ValidateNotInSmram) are present in the code.",
+    "The function does not contain SMM-specific context markers (e.g., EFI_SMM_XXX, SmiHandlerRegister)."
+  ]
+}
+```

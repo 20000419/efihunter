@@ -1,0 +1,17 @@
+
+
+```json
+{
+  "function": "sub_1000",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Out-of-bounds Read Vulnerability"
+  ],
+  "evidence": [
+    "Unvalidated pointer arithmetic and direct memory copy operations using qmemcpy (equivalent to CopyMem) without buffer bounds checks.",
+    "Lack of validation for source/destination pointers (a1, a2) or size (a3), enabling potential memory corruption or information disclosure.",
+    "Use of untrusted input (a1, a2, a3) in a memory-critical context without constraints (e.g., ValidateNotInSmram)."
+  ]
+}
+```

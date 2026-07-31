@@ -1,0 +1,17 @@
+
+
+```json
+{
+  "function": "sub_1E64",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Out-of-bounds Write Vulnerability"
+  ],
+  "evidence": [
+    "sub_1E34 returns a pointer (result) from an SMM service call (gSmst_0 + 80) without validation checks (e.g., BufferInCmdBuffer/ValidateNotInSmram).",
+    "sub_1000 performs a memory copy (qmemcpy) using the unvalidated result pointer and user-controlled size (a1) without boundary checks.",
+    "No atomic protection or security validation mechanisms (e.g., __security_check) are present in the code flow."
+  ]
+}
+```

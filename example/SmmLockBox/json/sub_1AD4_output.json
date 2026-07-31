@@ -1,0 +1,15 @@
+
+
+```json
+{
+  "function": "sub_1AD4",
+  "risk_level": "low",
+  "vulnerability_type": [],
+  "evidence": [
+    "Function only sets a byte flag (byte_3170 = 1) and returns 0 without any SMM-specific operations",
+    "No SMRAM-related variables (mSmramBase/mSmramSize) or register access (ReadCpuRegXX) detected",
+    "No dangerous memory operations (CopyMem/pointer dereference) or validation logic",
+    "Function does not handle external input data or perform buffer operations"
+  ]
+}
+```

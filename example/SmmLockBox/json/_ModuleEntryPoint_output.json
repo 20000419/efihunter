@@ -1,0 +1,15 @@
+
+
+```json
+{
+  "function": "sub_12AC",
+  "risk_level": "high",
+  "vulnerability_type": ["Memory Corruption Vulnerability"],
+  "evidence": [
+    "Unvalidated register read via sub_11D0(0x80000000, &SmramMapSize, ...) and sub_11D0(0x80000008, &SmramMapSize, ...)",
+    "Direct use of SmramMapSize in calculations without bounds checks (e.g., qword_3228 = (1 << v8) - 1)",
+    "No validation functions (e.g., BufferInCmdBuffer, ValidateNotInSmram) present in the data flow",
+    "SMRAM-related operations (EfiSmmAccess2Protocol->GetCapabilities) with untrusted input propagation"
+  ]
+}
+```

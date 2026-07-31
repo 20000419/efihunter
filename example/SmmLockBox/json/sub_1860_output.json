@@ -1,0 +1,14 @@
+
+
+```json
+{
+  "function": "sub_1860",
+  "risk_level": "high",
+  "vulnerability_type": ["Stack Buffer Overflow Vulnerability", "Memory Corruption Vulnerability"],
+  "evidence": [
+    "sub_1000(v4, (char *)a1, 0x30ui64): Copies 0x30 bytes into a 16-byte stack buffer (v4), causing stack overflow.",
+    "Unvalidated pointer 'a1' used in CopyMem operation without range checks or SMRAM validation.",
+    "Local variables v6/v7 on stack may be corrupted if buffer overflow occurs, leading to memory corruption."
+  ]
+}
+```

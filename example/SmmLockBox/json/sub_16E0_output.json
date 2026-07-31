@@ -1,0 +1,19 @@
+
+
+```json
+{
+  "function": "sub_16E0",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "SMM Callout Vulnerability"
+  ],
+  "evidence": [
+    "Calls SMM system table services (gSmst_0 + 224/192) with unvalidated parameters",
+    "Registers ChildSwSmiHandler via SMM communication GUID without explicit pointer validation",
+    "Uses unvalidated data flow to SMRAM via sub_1040(&unk_3230) which manipulates CPU registers (rdsspq/incsspq)",
+    "No BufferInCmdBuffer/ValidateNotInSmram checks for memory operations",
+    "Direct pointer arithmetic in sub_1110 with CPU register values (rdsspq) without bounds checks"
+  ]
+}
+```

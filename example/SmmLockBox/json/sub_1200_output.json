@@ -1,0 +1,17 @@
+
+
+```json
+{
+  "function": "sub_1200",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Out-of-bounds Write Vulnerability"
+  ],
+  "evidence": [
+    "Unvalidated pointer 'a1' and size 'a2' used in consecutive memset operations without buffer boundary checks",
+    "Dynamic calculation '8 * (a2 >> 3)' and 'a2 & 7' could lead to out-of-bounds writes if 'a1' buffer size is insufficient",
+    "No validation functions (e.g., BufferInCmdBuffer, ValidateNotInSmram) are called to ensure memory safety"
+  ]
+}
+```

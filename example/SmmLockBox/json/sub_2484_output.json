@@ -1,0 +1,15 @@
+
+
+```json
+{
+  "function": "sub_2484",
+  "risk_level": "low",
+  "vulnerability_type": [],
+  "evidence": [
+    "Function performs multiple validation checks on memory ranges (e.g., a1/a2 against qword_3228 and overlapping regions in qword_3350/qword_3348).",
+    "Includes nested loops to ensure no overlap with pre-defined memory regions, reducing risk of out-of-bounds or SMRAM corruption.",
+    "Conditional logic (e.g., byte_3220 flag checks) and range comparisons suggest structured validation rather than untrusted data handling.",
+    "No direct SMM-specific operations (e.g., ReadCpuRegXX, CopyMem) or SMRAM interaction (e.g., mSmramBase) observed."
+  ]
+}
+```

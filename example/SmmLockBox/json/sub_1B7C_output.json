@@ -1,0 +1,14 @@
+
+
+```json
+{
+  "function": "sub_1B7C",
+  "risk_level": "low",
+  "vulnerability_type": [],
+  "evidence": [
+    "Function uses standard UEFI Boot Services (gBS->LocateProtocol) to retrieve GET_PCD_INFO_PROTOCOL_GUID.",
+    "No SMM context indicators (e.g., SMI handler, SMRAM operations, EFI_SMM_XXX services) present.",
+    "No unvalidated memory operations or register access patterns detected."
+  ]
+}
+```

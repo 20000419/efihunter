@@ -1,0 +1,14 @@
+
+
+```json
+{
+  "function": "sub_1FD8",
+  "risk_level": "High",
+  "vulnerability_type": ["SMM Callout Vulnerability"],
+  "evidence": [
+    "Registers an SMM callback (`sub_1FCC`) via `EFI_SMM_SX_DISPATCH2_PROTOCOL->Register` without validating the callback function's safety or origin.",
+    "No checks for `BufferInCmdBuffer()` or `ValidateNotInSmram()` are present in the registration logic.",
+    "The callback registration path directly uses untrusted input (`sub_1FCC`) in a privileged SMM context."
+  ]
+}
+```

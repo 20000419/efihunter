@@ -1,0 +1,19 @@
+
+
+```json
+{
+  "function": "sub_1E34",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Out-of-bounds Read Vulnerability"
+  ],
+  "evidence": [
+    "Calls an SMM service via gSmst_0 (offset +80) with unvalidated input parameter a2",
+    "Uses a2 directly without checking if it's within SMRAM or a trusted buffer",
+    "Stores result in local variable v5 without bounds checking",
+    "Lacks validation functions like BufferInCmdBuffer() or ValidateNotInSmram()",
+    "Returns unvalidated pointer value v3 (v5) directly"
+  ]
+}
+```

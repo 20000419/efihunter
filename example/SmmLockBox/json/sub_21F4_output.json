@@ -1,0 +1,18 @@
+
+
+```json
+{
+  "function": "sub_21F4",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Contents Leak/Information Disclosure Vulnerability",
+    "Memory Corruption Vulnerability"
+  ],
+  "evidence": [
+    "sub_1000((char *)Memory, v14, v13) performs unvalidated copy from v14 (old buffer address from v9[6]) without checking if the source is in SMRAM or valid.",
+    "sub_1000(v16, a3, a4) copies data from untrusted input parameter a3 to dynamically allocated buffer v16 without validating a3's origin.",
+    "sub_1200((char *)v9[6], v15) zeros memory in v9[6] (old buffer) without ensuring it is not SMRAM-protected memory.",
+    "Calls to gSmst->SmmAllocatePages and gSmst->SmmFreePages indicate SMRAM memory management but lack validation of allocated/deallocated regions."
+  ]
+}
+```

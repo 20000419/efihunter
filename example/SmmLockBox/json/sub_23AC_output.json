@@ -1,0 +1,19 @@
+
+
+```json
+{
+  "function": "sub_23AC",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Information Disclosure Vulnerability"
+  ],
+  "evidence": [
+    "Calls sub_203C which retrieves unvalidated pointer (v6) used in subsequent operations",
+    "Uses sub_1000 (memcpy equivalent) to copy data between unvalidated pointers (v4 and v7[6])",
+    "No validation checks (e.g., BufferInCmdBuffer/ValidateNotInSmram) for destination pointer v4",
+    "Size parameter v10 is derived from v7[4] without bounds validation",
+    "Direct pointer arithmetic and dereference in SMM context without SMRAM confinement checks"
+  ]
+}
+```

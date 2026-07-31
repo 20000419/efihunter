@@ -1,0 +1,18 @@
+
+
+```json
+{
+  "function": "sub_1EA4",
+  "risk_level": "medium",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Out-of-bounds Read Vulnerability"
+  ],
+  "evidence": [
+    "Function uses SMM-specific FreePool without explicit SMRAM validation of input pointer",
+    "sub_1DF0 performs range checks but does not explicitly validate if the pointer is in SMRAM",
+    "Lack of explicit BufferInCmdBuffer() or ValidateNotInSmram() calls in the validation chain",
+    "Potential for untrusted pointer dereference through gSmst_0->SmmFreePool(a1) if sub_1DF0 validation fails"
+  ]
+}
+```

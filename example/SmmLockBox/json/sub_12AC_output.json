@@ -1,0 +1,20 @@
+
+
+```json
+{
+  "function": "sub_12AC",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Out-of-bounds Read Vulnerability",
+    "Memory Contents Leak/Information Disclosure Vulnerability"
+  ],
+  "evidence": [
+    "Calls sub_1E34 to obtain SMRAM descriptor pointer (qword_3398) without validation before passing to EfiSmmAccess2Protocol->GetCapabilities",
+    "Uses sub_1F6C to retrieve communication buffer pointer without validating SMRAM residency before installing configuration table",
+    "No BufferInCmdBuffer/ValidateNotInSmram checks for pointers obtained from sub_1E34 and sub_1F6C",
+    "Unvalidated CPUID result (SmramMapSize) used in subsequent operations without range checks",
+    "Iterates through HOB list without validating bounds in sub_1EDC"
+  ]
+}
+```

@@ -1,0 +1,18 @@
+
+
+```json
+{
+  "function": "sub_1040",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Information Disclosure Vulnerability"
+  ],
+  "evidence": [
+    "Direct unvalidated writes to pointer 'a1' at multiple offsets (e.g., a1+248, a1+0, etc.) without buffer validation",
+    "No validation checks for 'a1' pointer (e.g., BufferInCmdBuffer/ValidateNotInSmram) before memory operations",
+    "Untrusted function pointer call to v24() without validation",
+    "Use of CPU register reads (__readcr4) and inline assembly (incsspq/rdsspq) in privileged context"
+  ]
+}
+```

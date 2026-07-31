@@ -1,0 +1,19 @@
+
+
+```json
+{
+  "function": "sub_17AC",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Stack Buffer Overflow Vulnerability"
+  ],
+  "evidence": [
+    "Unvalidated pointer usage in sub_1000 call (a1 parameter) without SMRAM validation checks",
+    "Direct memory write to untrusted pointer (a1+8) without bounds checking",
+    "Unrestricted CopyMem (sub_1000) with size 0x28 to potentially untrusted buffer v5[16]",
+    "Lack of BufferInCmdBuffer/ValidateNotInSmram checks for a1 parameter",
+    "Potential SMM memory corruption via unvalidated write to *(_QWORD*)(v4 + 40)"
+  ]
+}
+```

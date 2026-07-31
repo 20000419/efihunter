@@ -1,0 +1,20 @@
+
+
+```json
+{
+  "function": "ChildSwSmiHandler",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Information Disclosure Vulnerability",
+    "Out-of-bounds Read Vulnerability"
+  ],
+  "evidence": [
+    "Unvalidated pointer usage in case 5 loop: copying between v10/v11 without BufferInCmdBuffer() checks",
+    "sub_2484 validation bypass in command 1 case: v16/v17 derived from untrusted buffer without full SMRAM overlap check",
+    "Direct CopyMem-equivalent (sub_1000) using untrusted buffer (CommBuffer) in multiple code paths",
+    "Lack of IsSmramLocked() checks in memory operations involving SMRAM addresses",
+    "Dynamic size calculations (v5, v16, v17) without explicit range validation"
+  ]
+}
+```

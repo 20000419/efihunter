@@ -1,0 +1,18 @@
+
+
+```json
+{
+  "function": "sub_1BBC",
+  "risk_level": "High",
+  "vulnerability_type": [
+    "SMM Callout Vulnerability",
+    "Memory Corruption Vulnerability"
+  ],
+  "evidence": [
+    "Uses gBS->CreateEvent and gBS->RegisterProtocolNotify in SMM context (boot services are invalid in SMM)",
+    "No validation of variable arguments (Event, v7) passed via va_arg",
+    "No checks for valid event creation or protocol registration success",
+    "Unvalidated function pointer 'a3' passed as notification callback"
+  ]
+}
+```

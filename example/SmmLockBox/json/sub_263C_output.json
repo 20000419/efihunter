@@ -1,0 +1,18 @@
+
+
+```json
+{
+  "function": "sub_263C",
+  "risk_level": "High",
+  "vulnerability_type": [
+    "Memory Contents Leak/Information Disclosure Vulnerability",
+    "Memory Corruption Vulnerability"
+  ],
+  "evidence": [
+    "调用sub_1E34获取指针并传递给sub_1000进行内存拷贝，未验证指针是否在SMRAM安全区域",
+    "通过sub_1EDC获取的内存属性表地址直接传递给sub_1E64进行处理，未验证该地址是否在SMRAM之外",
+    "使用sub_1000进行多次内存拷贝操作，未检查源/目标指针的边界有效性",
+    "未发现BufferInCmdBuffer/ValidateNotInSmram等SMRAM验证函数的调用"
+  ]
+}
+```

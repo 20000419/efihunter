@@ -1,0 +1,15 @@
+
+
+```json
+{
+  "function": "sub_11C0",
+  "risk_level": "low",
+  "vulnerability_type": [],
+  "evidence": [
+    "Function contains only _mm_lfence() instruction (CPU memory fence operation)",
+    "No SMRAM interactions or SMM-specific register operations detected",
+    "No dangerous memory operations (CopyMem/pointer dereference) present",
+    "Not part of an SMI handler or SMM service context"
+  ]
+}
+```

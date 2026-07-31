@@ -1,0 +1,18 @@
+
+
+```json
+{
+  "function": "sub_203C",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Out-of-bounds Read Vulnerability"
+  ],
+  "evidence": [
+    "Unvalidated pointer dereference: v2 = *(_QWORD***)(v0 + 8) (v0 derived from SMM context)",
+    "Unvalidated pointer chain traversal: v3 = (_QWORD*)*v3",
+    "No SMRAM/SMI validation checks (e.g., ValidateNotInSmram or BufferInCmdBuffer)",
+    "Direct memory access to potentially untrusted data structures from SMM communication area"
+  ]
+}
+```

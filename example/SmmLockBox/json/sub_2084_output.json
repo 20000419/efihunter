@@ -1,0 +1,20 @@
+
+
+```json
+{
+  "function": "sub_2084",
+  "risk_level": "high",
+  "vulnerability_type": [
+    "Memory Corruption Vulnerability",
+    "Out-of-bounds Read Vulnerability",
+    "Information Disclosure Vulnerability"
+  ],
+  "evidence": [
+    "Unvalidated pointer operations using sub_203C() which indirectly accesses gSmst (SMM context)",
+    "Direct use of user-controlled a2/a1 without buffer validation before memory copy operations",
+    "No SMRAM boundary checks for allocated Memory buffer (SmmAllocatePages/SmmAllocatePool)",
+    "Unvalidated pointer arithmetic in sub_1F6C() which accesses gSmst+152/160 without range validation",
+    "Direct assignment of user-controlled a2 to buffer structure field (v8[3] = a2) without validation"
+  ]
+}
+```

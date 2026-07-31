@@ -1,0 +1,15 @@
+
+
+```json
+{
+  "function": "sub_1F6C",
+  "risk_level": "high",
+  "vulnerability_type": ["Memory Corruption Vulnerability", "Out-of-bounds Read Vulnerability"],
+  "evidence": [
+    "Loop with unbounded pointer arithmetic (i += 3) without bounds checking on *(_QWORD **)(gSmst + 160)",
+    "No validation of i[1] against MEMORY[0x3098] before dereferencing",
+    "Unbounded increment of v0 with comparison to v1 (untrusted input from gSmst + 152)",
+    "Direct return of *(_QWORD *)(*(_QWORD *)(gSmst + 160) + 24 * v0 + 16) without SMRAM validation"
+  ]
+}
+```
