@@ -35,18 +35,29 @@ import os
 import re
 import sys
 
-import openai
-
 DEFAULT_MODEL = "qwen3-30b-a3b"
 
-client = openai.OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY", ""),
-    base_url=os.environ.get("OPENAI_BASE_URL", "http://localhost:8000/v1/"),
-    timeout=3600,
-    max_retries=3,
-)
-
 JSON_BLOCK_RE = re.compile(r"```json(.*?)```", re.DOTALL)
+
+_client = None
+
+
+def get_client():
+    """Create the LLM client on first use.
+
+    Deferred so that --help and the offline unit tests work without the openai
+    package installed and without credentials in the environment.
+    """
+    global _client
+    if _client is None:
+        import openai
+        _client = openai.OpenAI(
+            api_key=os.environ.get("OPENAI_API_KEY", ""),
+            base_url=os.environ.get("OPENAI_BASE_URL", "http://localhost:8000/v1/"),
+            timeout=3600,
+            max_retries=3,
+        )
+    return _client
 
 
 # --------------------------------------------------------------------------
@@ -182,7 +193,7 @@ def build_prompt(rules, func, source, st_mem, lt_mem, chains):
 
 
 def analyse(prompt, model):
-    response = client.chat.completions.create(
+    response = get_client().chat.completions.create(
         model=model,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.6,
@@ -256,11 +267,6 @@ def main():
                                                       DEFAULT_MODEL))
     ap.add_argument("--out", default="output")
     args = ap.parse_args()
-
-    if not client.api_key:
-        print("set OPENAI_API_KEY (any value for a local server)",
-              file=sys.stderr)
-        return 1
 
     with open(args.prompt_file, "r", encoding="utf-8") as fh:
         rules = fh.read().strip()

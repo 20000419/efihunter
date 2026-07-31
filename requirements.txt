@@ -1,2 +1,4 @@
 openai>=1.0
+networkx>=3.0
+scikit-learn
 angr
