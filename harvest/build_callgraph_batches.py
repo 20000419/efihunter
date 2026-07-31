@@ -95,22 +95,35 @@ def drop_reciprocal_edges(graph):
     return removed
 
 
-def break_remaining_cycles(graph):
-    """Fallback for cycles longer than two functions (A -> B -> C -> A).
+def next_batch(graph):
+    """Take the functions of least out-degree as the next batch.
 
-    Reciprocal pairs are already gone; anything still cyclic is condensed by
-    dropping the edges inside each strongly connected component, which places the
-    members of that cycle in one batch. Returns the number of edges removed.
+    Normally the minimum is 0 and this is ordinary callee-first peeling: a function
+    is ready once every callee it depends on has been emitted.
+
+    When a cycle longer than two functions survives (A -> B -> C -> A) nothing
+    reaches out-degree 0, and the cycle is taken as one batch, since its members
+    cannot be ordered with respect to one another. The least-out-degree rule is
+    applied only among functions that actually lie on a cycle: an ordinary caller
+    of the cycle (D -> A) may share their out-degree, but it genuinely depends on
+    them and must still be analysed afterwards. Edges among the batch members are
+    then dropped so they no longer order anything.
     """
-    removed = 0
-    for component in nx.strongly_connected_components(graph):
-        if len(component) < 2:
-            continue
-        for u, v in list(graph.edges(component)):
-            if u in component and v in component:
-                graph.remove_edge(u, v)
-                removed += 1
-    return removed
+    ready = sorted(n for n, d in graph.out_degree() if d == 0)
+    if ready:
+        return ready
+
+    on_cycle = {n for scc in nx.strongly_connected_components(graph)
+                if len(scc) > 1 for n in scc}
+    candidates = on_cycle or set(graph.nodes)
+    least = min(graph.out_degree(n) for n in candidates)
+    batch = sorted(n for n in candidates if graph.out_degree(n) == least)
+
+    members = set(batch)
+    for u, v in list(graph.edges(batch)):
+        if u in members and v in members:
+            graph.remove_edge(u, v)
+    return batch
 
 
 def batches(graph):
@@ -121,17 +134,7 @@ def batches(graph):
         print(f"dropped {n} mutual-call/self-loop edges from the ordering")
 
     while pending.number_of_nodes():
-        batch = [n for n, d in pending.out_degree() if d == 0]
-        if not batch:
-            # Only longer cycles can reach here; condense them and retry.
-            if not break_remaining_cycles(pending):
-                # Defensive: should be unreachable, but never spin forever.
-                print("warning: unresolvable cycle; emitting the remainder as a "
-                      "single batch", file=sys.stderr)
-                yield sorted(pending.nodes)
-                return
-            continue
-        batch.sort()
+        batch = next_batch(pending)
         yield batch
         pending.remove_nodes_from(batch)
 
