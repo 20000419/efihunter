@@ -3,8 +3,10 @@
 
 Each experimental configuration is logged to a SQLite `query_result.db` with one
 row per (function, query type, shot setting). This script exports those rows into
-CSV so that every number in the paper's tables can be recomputed from fixed
-outputs, without re-running non-deterministic LLM inference.
+CSV for inspection of available fixed outputs. This legacy regex exporter omits
+explicit trial identifiers; it is not the authoritative CSCloud headline export.
+Use reproduce_cscloud_headline.py for the verified headline and its literal
+scoring rule, without re-running non-deterministic LLM inference.
 
 Two levels are produced:
 

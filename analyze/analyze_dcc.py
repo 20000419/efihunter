@@ -2,9 +2,9 @@
 """Analyze phase: Dynamic Call Context classification with dual memory.
 
 This implements Algorithm 2 of the paper. Functions are processed in the
-callee-first batch order produced by harvest/build_callgraph_batches.py, so that
-by the time a caller is analysed, every callee it depends on already has a
-verdict. Each prompt is assembled from four parts:
+callee-first batch order produced by harvest/build_callgraph_batches.py, with
+cycle-breaking where strict ordering is impossible. Context reads only findings
+available in earlier completed batches. Each prompt has four parts:
 
   1. the rule rubric (the SMM vulnerability rules, read from a prompt file);
   2. SHORT-TERM MEMORY -- the pseudocode of the function's immediate callees;
@@ -13,12 +13,11 @@ verdict. Each prompt is assembled from four parts:
      successive function was also flagged, plus a one-line summary of the chain;
   4. the pseudocode of the function under analysis.
 
-The chain in (3) is what carries cross-function state. If A calls A1, A1 calls B1,
-and both A1 and B1 were flagged, then when A is analysed its context holds the
-sources of A, A1, A2, A3 (short-term), the verdicts of A1 and B1 with the source
-of B1, and the line "A -> A1 -> B1". A function judged clean terminates the chain:
-nothing below it is pulled in, which is what keeps the context bounded instead of
-growing with the size of the call graph.
+For A -> B -> C, if B and C were flagged in earlier batches, analyzing A
+includes immediate-callee code for B and stored findings for B and C (plus
+available deeper code for C). An unflagged node stops that branch. A visited
+set prevents repeated expansion through cycles or shared descendants. Selection
+reduces redundancy but does not enforce a fixed token limit.
 
 Usage:
     export OPENAI_API_KEY=...            # any value for a local server
@@ -115,37 +114,36 @@ def short_term_memory(func, relations, folder):
 
 
 def long_term_memory(func, relations, folder, flagged, verdicts):
-    """Findings along call chains of consecutively flagged functions.
+    """Collect each reachable flagged callee once, with one representative path.
 
-    Walks down from `func`, following only callees that were themselves flagged.
-    A clean function terminates that branch, so unflagged subtrees never enter the
-    context. Returns (context_text, [chain_paths]).
+    Only flagged callees are expanded. A per-query visited set prevents cycles
+    and duplicate expansion through shared descendants. An explicit DFS stack
+    avoids Python recursion limits on deep, acyclic call graphs. This traversal
+    preserves relation order; it does not enumerate all possible call paths.
     """
-    entries, chains, seen = [], [], set()
-
-    def walk(node, path):
-        for callee in relations.get(node, []):
-            if not flagged.get(callee):
-                continue                      # chain breaks at a clean function
-            chain = path + [callee]
-            if callee not in seen:
-                seen.add(callee)
-                block = [f"// flagged callee: {callee}",
-                         f"// on chain: {' -> '.join(chain)}",
-                         "```json",
-                         json.dumps(verdicts.get(callee, {}), ensure_ascii=False,
-                                    indent=2),
-                         "```"]
-                src = read_source(folder, callee)
-                if src and callee not in relations.get(func, []):
-                    # Direct callees already appear in short-term memory; deeper
-                    # ones need their source supplied here.
-                    block.append(f"```c\n{src}\n```")
-                entries.append("\n".join(block))
-            chains.append(" -> ".join(chain))
-            walk(callee, chain)
-
-    walk(func, [func])
+    entries, chains, seen = [], [], {func}
+    immediate = set(relations.get(func, []))
+    pending = [(callee, [func])
+               for callee in reversed(relations.get(func, []))]
+    while pending:
+        callee, path = pending.pop()
+        if not flagged.get(callee) or callee in seen:
+            continue
+        seen.add(callee)
+        chain = path + [callee]
+        block = [f"// flagged callee: {callee}",
+                 f"// on chain: {' -> '.join(chain)}",
+                 "```json",
+                 json.dumps(verdicts.get(callee, {}), ensure_ascii=False,
+                            indent=2),
+                 "```"]
+        src = read_source(folder, callee)
+        if src and callee not in immediate:
+            block.append(f"```c\n{src}\n```")
+        entries.append("\n".join(block))
+        chains.append(" -> ".join(chain))
+        pending.extend((child, chain)
+                       for child in reversed(relations.get(callee, [])))
     return "\n\n".join(entries), chains
 
 
@@ -228,16 +226,17 @@ def process_module(folder, rules, model, out_root):
     out_dir = os.path.join(out_root, os.path.basename(folder.rstrip(os.sep)))
 
     flagged, verdicts, done = {}, {}, 0
-    # Batches are processed in order and sequentially within a module: a caller's
-    # long-term memory is only correct once its callees have verdicts.
+    # A batch reads one earlier-batch snapshot, even when functions run serially.
+    # Original call edges may exist within a batch after scheduling breaks cycles.
     for index, batch in enumerate(batches, start=1):
+        flagged_snapshot, verdicts_snapshot = dict(flagged), dict(verdicts)
         for func in batch:
             source = read_source(folder, func)
             if source is None:
                 continue
             st_mem = short_term_memory(func, relations, folder)
             lt_mem, chains = long_term_memory(func, relations, folder,
-                                              flagged, verdicts)
+                                              flagged_snapshot, verdicts_snapshot)
             prompt = build_prompt(rules, func, source, st_mem, lt_mem, chains)
             try:
                 reasoning, content = analyse(prompt, model)
@@ -252,6 +251,7 @@ def process_module(folder, rules, model, out_root):
         print(f"  batch {index}/{len(batches)}: {len(batch)} functions "
               f"({sum(flagged.values())} flagged so far)")
 
+    os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "combined_results.json"), "w",
               encoding="utf-8") as fh:
         json.dump({"flagged": flagged, "verdicts": verdicts}, fh,

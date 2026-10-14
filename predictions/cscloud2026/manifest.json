@@ -1,0 +1,29 @@
+{
+  "run_id": "latest_headline",
+  "source_database_alias": "latest/query_result.db",
+  "source_database_sha256": "5a0e7678ec7322ecd461badf15cde8d9f66252b8876197819047538fda21e78d",
+  "stored_model_label": "qwen3-30b-a3b-deepthink",
+  "selection": {
+    "dataset": "UEFI",
+    "dataset_type": "UEFI",
+    "query_type": "binary_classification_single_function",
+    "prompt_type": "2_shot"
+  },
+  "records": 1500,
+  "functions": 300,
+  "trial_ids": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "scoring": "Positive if the case-insensitive response contains the literal VULNERABLE: YES; all other responses are negative.",
+  "export_sha256": "e9ac0d7d6e6582a30d411afaabb1e99fb3479d00e9cf5d8dee8ce3fb3b01d895",
+  "provenance_limits": [
+    "Full request snapshots and original launch settings were not recovered.",
+    "Stored model label alone does not establish the thinking-mode switch or exact checkpoint.",
+    "No independently attributable short-only/long-only runs are supplied.",
+    "Current traversal correction has not regenerated these historical model outputs."
+  ]
+}

@@ -1,6 +1,7 @@
 cff-version: 1.2.0
 title: "EFIhunter: Dynamic Call Context Framework for LLM-Driven Binary Vulnerability Detection"
-message: "If you use this software, please cite the accompanying paper."
+message: "See README for the accompanying paper, accepted as a Regular Paper at IEEE CSCloud 2026; final publication metadata is pending."
+type: software
 authors:
   - family-names: Liu
     given-names: Zhenyu
@@ -15,3 +16,5 @@ authors:
   - family-names: Wang
     given-names: Chaobing
 license: MIT
+repository-code: "https://github.com/20000419/efihunter"
+version: "cscloud2026-revision-20261014"
