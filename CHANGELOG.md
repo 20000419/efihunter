@@ -1,6 +1,6 @@
 # Changes
 
-## cscloud2026-revision-20261014
+## cscloud2026-revision-20261014.1
 
 - Make long-term context traversal terminate on cycles and avoid recursion-depth
   failures; retain one representative path per function.

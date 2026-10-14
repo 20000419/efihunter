@@ -115,7 +115,7 @@ new software-correctness tests.
 
 The accompanying paper is accepted at IEEE CSCloud 2026; it is not yet identified
 by a final DOI or proceedings page range. Authors and software metadata are in
-[CITATION.cff](CITATION.cff). The `cscloud2026-revision-20261014` tag identifies
+[CITATION.cff](CITATION.cff). The `cscloud2026-revision-20261014.1` tag identifies
 this repository revision associated with the manuscript update; it is not a
 claim that this code generated the historical predictions.
 

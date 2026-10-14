@@ -1,7 +1,10 @@
 # Track phase (optional symbolic-validation filter)
 
-The Track phase builds a Vulnerability Call Flow Graph (VCFG) and uses symbolic
-execution to validate high-confidence Analyze-phase flags. It is an OPTIONAL
-deployment-time precision filter, not part of the detection signal reported in the
-paper's tables. The reference implementation is a stub/partial; a full release is
-planned. Analyze-phase output is fully reproducible from the scripts in ../analyze.
+Track is a proposed validation stage: construct a Vulnerability Call Flow Graph
+(VCFG) and use symbolic execution to check candidate findings. This directory
+contains design notes, not an automated symbolic filter. Historical predictions
+were not filtered by this stage. The case studies used manual validation.
+
+Fixed-output metric recomputation is documented in
+[CSCloud experiment provenance](../docs/CSCloud2026.md). It is separate from
+replaying the historical inference process with complete original settings.

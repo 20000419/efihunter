@@ -2,7 +2,7 @@
 
 The accompanying paper, *Dynamic Call Context: LLM-Driven Vulnerability Detection
 in Closed-Source Binaries*, is accepted as a Regular Paper at IEEE CSCloud 2026.
-The tag `cscloud2026-revision-20261014` identifies this implementation and archive
+The tag `cscloud2026-revision-20261014.1` identifies this implementation and archive
 update. Final publication metadata is pending.
 
 ## Current implementation
